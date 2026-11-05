@@ -5,12 +5,14 @@
  */
 
 #include "memory.h"
+#include "modify.h"
 
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
 
 static unsigned long instr_count;
+static void *memory_hierarchy;
 
 void memory_init(void)
 {
