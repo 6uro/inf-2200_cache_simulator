@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "memory.h"
 
-#define N 256  // Matrix size
+#define N 3  // Matrix size, originally 256
 #define CLS 64  // Cache Line Size
 #define SM (CLS/sizeof(double))  // Nb of double in each cache line
 
@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
 	double* b = malloc(N*N * sizeof(double));
 	double* c = malloc(N*N * sizeof(double));
 	static uint32_t instruction_num[16];
+	//printf("memory adress: %p\n", instruction_num);
+	//return 0;
 	if(BENCHMARK == NAIVE) {
 		naive_mat_mul(a, b, c, instruction_num);
 	} else {
