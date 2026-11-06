@@ -25,12 +25,10 @@ static memory_t *memory_hierarchy;
 
 // Define structs
 struct cache_element {
-  int valid_bit;
-  int tag_bit;
-  int index_bit; // do not need
-  int offset; // do not need
+  unsigned int valid_bit;
+  uint64_t tag_bit;
   
-  int dirty_bit;
+  unsigned int dirty_bit;
   data_t data;
 };
 
@@ -98,17 +96,20 @@ cache_t *new_cache(int cache_size,int line_size, int cache_associativity, replac
 
 /** new_element() creates a new adress-data element that can be added to a given cache.
  */
-element_t *new_element(uint32_t address, data_t data, int tag_size, int index_size, int offset_size) {
-  element_t *element = malloc(sizeof(element_t));
-  if (element == NULL) {
-    printf("Memory allocation of new element failed \n");
-    return NULL;
+element_t new_element(uint32_t instruction_address, double data_address, data_t data, int tag_size, int index_size, int offset_size) {
+  
+  element_t element;
+  
+  if (instruction_address) {
+    uint64_t address = instruction_address;
+  } else {
+    uint64_t address = data_address;
   }
-  element->data = data;
-  element->valid_bit = 1;
-  element->index_bit = address >> offset_size;
-  element->offset = address & 0x3F;
-  element->tag_bit = address >> 13;
+
+  element.data = data;
+  element.valid_bit = 1;
+  element.tag_bit = address >> (index_size + offset_size);
+  element.dirty_bit = 0;
 
   return element;
 };
@@ -116,7 +117,7 @@ element_t *new_element(uint32_t address, data_t data, int tag_size, int index_si
 /** dissect_address takes an array and converts the given address into the tag-bit(0), index-bit(1) and tag-bit(2).
 If a parameter isn't relevant, write 0 for it.
  */
-void dissect_address(uint32_t instruction_adress, double data_address, int offset_size, int tag_size, int index_size, int tag, int offset, int index, int results[3]) {
+void dissect_address(uint32_t instruction_adress, double data_address, int offset_size, int tag_size, int index_size, int tag, int offset, int index, int results[]) {
   if (instruction_adress) {
     uint32_t address = instruction_adress;
   }
@@ -173,7 +174,14 @@ void memory_fetch(uint32_t* address, data_t *data)
   // ------------------------------------- //
 
   // Get index from adress
+  int tag_index_offsett[3];
+  dissect_address(*address, 0, memory_hierarchy->L1i->offset, memory_hierarchy->L1i->tag, memory_hierarchy->L1i->index, 1, 1, 1, tag_index_offsett);
   // Check in L1d cache
+  element_t *cache_lines = memory_hierarchy->L1i->Cache_Lines;
+  for (int i; i < memory_hierarchy->L1i->associativity; i++) {
+    
+  }
+
     // Note hit or miss, and return or continue
   // IF miss check in L2 cache
     // Note hit or miss, and return or continue
@@ -193,7 +201,7 @@ void memory_read(double* address, data_t *data)
 
   // ------------------------------------- //
 
-  // Get index from adress
+  // Get index from address
   // Check in L1i cache
     // Note hit or miss, and return or continue
   // IF miss check in L2 cache
